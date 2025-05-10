@@ -1,12 +1,12 @@
 package org.example.taskmanager;
 
+import dev.morphia.annotations.Entity;
+import dev.morphia.annotations.Id;
+import dev.morphia.annotations.Property;
 import org.bson.types.ObjectId;
-import org.mongodb.morphia.annotations.Entity;
-import org.mongodb.morphia.annotations.Id;
-import org.mongodb.morphia.annotations.Property;
+
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity("tasks")
 public class Task {
@@ -28,7 +28,7 @@ public class Task {
     @Property("priority")
     private int priority;
 
-    public Task(String title, String description, boolean completed, Date deadline, int priority) {
+    public Task(String title, String description, boolean completed, LocalDateTime deadline, int priority) {
         this.title = title;
         this.description = description;
         this.completed = completed;

@@ -121,7 +121,11 @@
             <artifactId>bson</artifactId>
             <version>4.11.1</version>
         </dependency>
-
+        <dependency>
+            <groupId>dev.morphia.morphia</groupId>
+            <artifactId>morphia-core</artifactId>
+            <version>2.4.10</version> <!-- You can check for the latest version -->
+        </dependency>
     </dependencies>
 
     <build>

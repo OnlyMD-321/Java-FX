@@ -1,0 +1,42 @@
+// filepath: src/main/resources/org/example/efm/BookDialog.fxml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.DialogPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+
+<DialogPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.efm.controller.BookDialogController">
+    <headerText>
+        Book Details
+    </headerText>
+    <content>
+        <GridPane hgap="10" vgap="10">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+            <Label text="Title:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <TextField fx:id="titleField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+            <Label text="Author:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+            <TextField fx:id="authorField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+            <Label text="ISBN:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+            <TextField fx:id="isbnField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+            <Label text="Year:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+            <TextField fx:id="yearField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+            <Label text="Available:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+            <CheckBox fx:id="availableCheckBox" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+        </GridPane>
+    </content>
+    <buttonTypes>
+        <Button fx:id="saveButtonType" text="Save" buttonData="OK_DONE"/>
+        <Button text="Cancel" buttonData="CANCEL_CLOSE"/>
+    </buttonTypes>
+</DialogPane>

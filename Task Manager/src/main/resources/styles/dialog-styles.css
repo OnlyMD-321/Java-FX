@@ -1,0 +1,73 @@
+.dialog-pane {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 1px;
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.dialog-pane .label {
+    -fx-font-size: 13px;
+    -fx-text-fill: #495057;
+}
+
+.dialog-pane .text-field,
+.dialog-pane .text-area,
+.dialog-pane .date-picker,
+.dialog-pane .combo-box {
+    -fx-font-size: 13px;
+    -fx-pref-height: 30px;
+    -fx-border-color: #ced4da;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+}
+
+.dialog-pane .text-area {
+    -fx-pref-height: 80px; /* Adjust as needed */
+}
+
+
+.dialog-pane .button {
+    -fx-font-size: 13px;
+    -fx-padding: 6px 12px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+    cursor: pointer;
+}
+
+.dialog-pane .button:hover {
+    -fx-opacity: 0.9;
+}
+
+.dialog-pane .button-bar .button {
+    -fx-font-weight: bold;
+}
+
+/* Style for the Save/OK button */
+.dialog-pane .button:default {
+    -fx-background-color: #28a745; /* Green */
+    -fx-text-fill: white;
+}
+.dialog-pane .button:default:hover {
+    -fx-background-color: #218838;
+}
+
+/* Style for the Cancel button */
+.dialog-pane .button:cancel {
+    -fx-background-color: #6c757d; /* Gray */
+    -fx-text-fill: white;
+}
+.dialog-pane .button:cancel:hover {
+    -fx-background-color: #5a6268;
+}
+
+.dialog-pane .header-panel {
+    -fx-background-color: #e9ecef;
+    -fx-padding: 10px 15px;
+}
+
+.dialog-pane .header-panel .label {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #343a40;
+}

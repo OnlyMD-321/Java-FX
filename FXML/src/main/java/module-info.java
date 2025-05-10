@@ -1,9 +1,7 @@
-module org.example.tp2 {
+module org.example.fxml {
     requires javafx.controls;
     requires javafx.fxml;
     requires javafx.web;
-    requires javafx.graphics;
-    requires java.sql;
 
     requires org.controlsfx.controls;
     requires com.dlsc.formsfx;
@@ -12,10 +10,8 @@ module org.example.tp2 {
     requires org.kordamp.bootstrapfx.core;
     requires eu.hansolo.tilesfx;
     requires com.almasb.fxgl.all;
-    requires org.mongodb.driver.sync.client;
-    requires org.mongodb.driver.core;
-    requires org.mongodb.bson;
+    requires java.sql;
 
-    opens org.example.tp2 to javafx.fxml;
-    exports org.example.tp2;
+    opens org.example.fxml to javafx.fxml;
+    exports org.example.fxml;
 }

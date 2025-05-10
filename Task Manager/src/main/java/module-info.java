@@ -12,6 +12,9 @@ module org.example.taskmanager {
     requires com.almasb.fxgl.all;
     requires org.mongodb.driver.sync.client;
     requires org.mongodb.bson;
+    requires org.mongodb.driver.core;
+    requires morphia.core;
+    requires java.logging;
 
     opens org.example.taskmanager to javafx.fxml;
     exports org.example.taskmanager;
