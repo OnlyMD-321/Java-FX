@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.example.efm.db.DatabaseManager;
+import org.example.efm.model.User; // Import User model
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -17,25 +18,30 @@ import javafx.stage.Stage;
 public class Main extends Application {
 
     private static Stage primaryStage; // Store the primary stage
-    private static String currentUsername;
-    private static String currentUserRole;
+    private static User currentUser; // Store the full User object
+
+    public static User getCurrentUser() {
+        return currentUser;
+    }
 
     public static String getCurrentUserRole() {
-        return currentUserRole;
+        return currentUser != null ? currentUser.getRole() : null;
     }
 
     public static String getCurrentUsername() {
-        return currentUsername;
+        return currentUser != null ? currentUser.getUsername() : null;
     }
 
-    public static void setCurrentUser(String username, String role) {
-        currentUsername = username;
-        currentUserRole = role;
+    public static Long getCurrentUserId() {
+        return currentUser != null ? currentUser.getId() : null;
+    }
+
+    public static void setCurrentUser(User user) { // Accept User object
+        currentUser = user;
     }
 
     public static void clearCurrentUser() {
-        currentUsername = null;
-        currentUserRole = null;
+        currentUser = null;
     }
 
     @Override
@@ -89,7 +95,15 @@ public class Main extends Application {
     }
 
     public static void showBookListView() throws IOException {
-        loadScene("BookListView.fxml", "Library - Book List", 700, 500); // Adjusted size
+        loadScene("BookListView.fxml", "Library - Book List", 800, 600); // Adjusted size for new button
+    }
+
+    public static void showMemberManagementView() throws IOException {
+        loadScene("MemberManagementView.fxml", "Library - Borrower Management", 650, 450);
+    }
+
+    public static void showMyLoansView() throws IOException {
+        loadScene("MyLoansView.fxml", "Library - My Borrows", 750, 500);
     }
 
     public static void main(String[] args) {

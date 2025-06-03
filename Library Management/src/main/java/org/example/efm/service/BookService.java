@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.example.efm.db.DatabaseManager;
 import org.example.efm.model.Book;
+import org.example.efm.model.Loan; // Required for checking active loans
 
 public class BookService {
 
@@ -34,6 +35,28 @@ public class BookService {
             e.printStackTrace();
         }
         return books;
+    }
+
+    public Book getBookById(long bookId) {
+        String sql = "SELECT id, title, author, isbn, \"year\", available FROM books WHERE id = ?";
+        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setLong(1, bookId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return new Book(
+                        rs.getLong("id"),
+                        rs.getString("title"),
+                        rs.getString("author"),
+                        rs.getString("isbn"),
+                        rs.getInt("year"),
+                        rs.getBoolean("available")
+                );
+            }
+        } catch (SQLException e) {
+            System.err.println("Error fetching book by ID: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public boolean addBook(Book book) {
@@ -69,15 +92,35 @@ public class BookService {
         }
     }
 
+    public boolean updateBookAvailability(long bookId, boolean available) {
+        String sql = "UPDATE books SET available = ? WHERE id = ?";
+        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setBoolean(1, available);
+            pstmt.setLong(2, bookId);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error updating book availability: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public boolean deleteBook(long bookId) {
-        // Consider checking for active loans before deleting
+        // Check for active loans before deleting
+        LoanService loanService = new LoanService(); // Consider injecting if using a DI framework
+        Loan activeLoan = loanService.getActiveLoanByBookId(bookId);
+        if (activeLoan != null) {
+            System.err.println("Cannot delete book ID " + bookId + ": It has an active loan.");
+            return false;
+        }
+
         String sql = "DELETE FROM books WHERE id = ?";
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setLong(1, bookId);
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("Error deleting book: " + e.getMessage());
-            // Handle foreign key constraint violations if book is in a loan
+            // Handle other foreign key constraint violations if book is in a loan (should be caught by above check)
             e.printStackTrace();
             return false;
         }

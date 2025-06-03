@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.image.ImageView?> <!-- Added ImageView import -->
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane prefHeight="600.0" prefWidth="950.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.pm.controller.MedicamentController">
+   <children>
+      <VBox spacing="10.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+         <children>
+            <Label style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Gestion des Médicaments" />
+            <TableView fx:id="medicamentTable" prefHeight="250.0" VBox.vgrow="ALWAYS">
+              <columns>
+                <TableColumn fx:id="idColumn" prefWidth="40.0" text="ID" />
+                <TableColumn fx:id="nomColumn" prefWidth="150.0" text="Nom" />
+                <TableColumn fx:id="categorieColumn" prefWidth="100.0" text="Catégorie" />
+                <TableColumn fx:id="prixColumn" prefWidth="70.0" text="Prix" />
+                <TableColumn fx:id="stockColumn" prefWidth="70.0" text="Stock Total" />
+                <TableColumn fx:id="seuilColumn" prefWidth="70.0" text="Seuil" />
+                <!-- Creative Columns -->
+                <TableColumn fx:id="stockStatusColumn" prefWidth="100.0" text="Statut Stock" />
+                <TableColumn fx:id="expiryStatusColumn" prefWidth="120.0" text="Statut Expiration" />
+                <TableColumn fx:id="descriptionColumn" prefWidth="180.0" text="Description" />
+              </columns>
+               <columnResizePolicy>
+                  <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+               </columnResizePolicy>
+            </TableView>
+            <GridPane hgap="10.0" vgap="5.0">
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="200.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="200.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="150.0" /> <!-- For Image -->
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="60.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" /> <!-- For Image Button -->
+              </rowConstraints>
+               <children>
+                  <Label text="Nom:" />
+                  <TextField fx:id="nomField" GridPane.columnIndex="1" />
+                  <Label text="Catégorie:" GridPane.columnIndex="2" />
+                  <TextField fx:id="categorieField" GridPane.columnIndex="3" />
+                  <Label text="Prix:" GridPane.rowIndex="1" />
+                  <TextField fx:id="prixField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <!-- Quantite Stock field removed, as it's derived from lots -->
+                  <!-- <Label text="Quantité Stock:" GridPane.columnIndex="2" GridPane.rowIndex="1" /> -->
+                  <!-- <TextField fx:id="quantiteStockField" GridPane.columnIndex="3" GridPane.rowIndex="1" editable="false" promptText="Géré par lots"/> -->
+                  <Label text="Seuil Alerte:" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                  <TextField fx:id="seuilAlerteField" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+
+                  <Label text="Description:" GridPane.rowIndex="3" />
+                  <TextArea fx:id="descriptionArea" prefHeight="60.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="3" />
+
+                   <!-- Medicament Image Display -->
+                   <ImageView fx:id="medicamentImageView" fitHeight="100.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="4" GridPane.rowIndex="0" GridPane.rowSpan="3">
+                       <GridPane.margin>
+                           <Insets left="10.0" />
+                       </GridPane.margin>
+                   </ImageView>
+                   <Button fx:id="selectImageButton" mnemonicParsing="false" onAction="#handleSelectImage" text="Choisir Image" GridPane.columnIndex="4" GridPane.rowIndex="3">
+                       <GridPane.margin>
+                           <Insets left="10.0" top="5.0"/>
+                       </GridPane.margin>
+                   </Button>
+                   <Label fx:id="imagePathLabel" text="" visible="false" GridPane.columnIndex="4" GridPane.rowIndex="4"/> <!-- Hidden label to store image path if needed -->
+               </children>
+               <VBox.margin>
+                  <Insets top="10.0" />
+               </VBox.margin>
+            </GridPane>
+            <HBox alignment="CENTER_RIGHT" spacing="10.0">
+               <children>
+                  <Button fx:id="nouveauButton" mnemonicParsing="false" onAction="#handleNouveau" text="Nouveau" />
+                  <Button fx:id="ajouterButton" mnemonicParsing="false" onAction="#handleAjouter" text="Ajouter" />
+                  <Button fx:id="modifierButton" mnemonicParsing="false" onAction="#handleModifier" text="Modifier" />
+                  <Button fx:id="supprimerButton" mnemonicParsing="false" onAction="#handleSupprimer" text="Supprimer" />
+                  <Button fx:id="gererLotsButton" mnemonicParsing="false" onAction="#handleGererLots" text="Gérer Lots" />
+               </children>
+               <VBox.margin>
+                  <Insets top="10.0" />
+               </VBox.margin>
+            </HBox>
+            <Label fx:id="alerteLabel" style="-fx-text-fill: red; -fx-font-weight: bold;" text="" VBox.vgrow="NEVER" />
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>

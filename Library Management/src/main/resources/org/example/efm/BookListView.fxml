@@ -33,6 +33,14 @@
         <Button text="Add New Book" onAction="#handleAddBookAction"/>
         <Button text="Edit Selected Book" onAction="#handleEditBookAction"/>
         <Button text="Delete Selected Book" onAction="#handleDeleteBookAction"/>
+        <Button text="Manage Borrowers" onAction="#handleManageBorrowersAction"/> <!-- Add this button -->
+    </HBox>
+
+    <HBox fx:id="userControlsBox" spacing="10" alignment="CENTER_LEFT">
+        <padding>
+            <Insets top="5" bottom="5"/>
+        </padding>
+        <Button text="My Borrows" onAction="#handleMyBorrowsAction"/>
     </HBox>
 
     <TableView fx:id="bookTableView" prefHeight="400.0" prefWidth="780.0" VBox.vgrow="ALWAYS">

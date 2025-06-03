@@ -6,7 +6,9 @@ import java.util.function.Predicate;
 
 import org.example.efm.Main;
 import org.example.efm.model.Book;
+import org.example.efm.model.User;
 import org.example.efm.service.BookService;
+import org.example.efm.service.LoanService; // Import LoanService
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -57,8 +59,11 @@ public class BookListController {
 
     @FXML
     private HBox managerControlsBox;
+    @FXML
+    private HBox userControlsBox; // Add this for the "My Borrows" button container
 
     private final BookService bookService = new BookService();
+    private final LoanService loanService = new LoanService(); // Instantiate LoanService
     private ObservableList<Book> masterBookList;
     private FilteredList<Book> filteredBookList;
 
@@ -84,7 +89,7 @@ public class BookListController {
         setupTableColumns();
         setupFilters();
         loadBooks();
-        setupManagerControls();
+        setupRoleBasedControls(); // Renamed for clarity
     }
 
     private void setupTableColumns() {
@@ -104,15 +109,22 @@ public class BookListController {
         });
 
         actionColumn.setCellFactory(param -> new TableCell<>() {
-            private final Button borrowButton = new Button("Borrow");
+            private final Button actionButton = new Button();
+            private Book currentBook = null;
 
             {
-                borrowButton.setOnAction(event -> {
-                    Book book = getTableView().getItems().get(getIndex());
-                    if (book.isAvailable()) {
-                        handleBorrowAction(book);
-                    } else {
-                        messageLabel.setText("Book '" + book.getTitle() + "' is not available.");
+                actionButton.setOnAction(event -> {
+                    if (currentBook != null) {
+                        if (currentBook.isAvailable()) {
+                            handleBorrowAction(currentBook);
+                        } else {
+                            // Only managers can return books directly from this list for now
+                            if ("manager".equalsIgnoreCase(Main.getCurrentUserRole())) {
+                                handleReturnAction(currentBook);
+                            } else {
+                                messageLabel.setText("Book is unavailable. Only managers can process returns here.");
+                            }
+                        }
                     }
                 });
             }
@@ -122,10 +134,23 @@ public class BookListController {
                 super.updateItem(item, empty);
                 if (empty) {
                     setGraphic(null);
+                    currentBook = null;
                 } else {
-                    Book book = getTableView().getItems().get(getIndex());
-                    borrowButton.setDisable(!book.isAvailable());
-                    setGraphic(borrowButton);
+                    currentBook = getTableView().getItems().get(getIndex());
+                    if (currentBook.isAvailable()) {
+                        actionButton.setText("Borrow");
+                        actionButton.setDisable(false);
+                    } else {
+                        // If book is not available, only manager sees "Return"
+                        if ("manager".equalsIgnoreCase(Main.getCurrentUserRole())) {
+                            actionButton.setText("Return");
+                            actionButton.setDisable(false);
+                        } else {
+                            actionButton.setText("Unavailable"); // Or "Borrowed"
+                            actionButton.setDisable(true);
+                        }
+                    }
+                    setGraphic(actionButton);
                 }
             }
         });
@@ -174,10 +199,10 @@ public class BookListController {
 
     private void loadBooks() {
         masterBookList = FXCollections.observableArrayList(bookService.getAllBooks());
-        filteredBookList = new FilteredList<>(masterBookList, p -> true); // Initially show all
+        filteredBookList = new FilteredList<>(masterBookList, p -> true);
 
         SortedList<Book> sortedData = new SortedList<>(filteredBookList);
-        sortedData.comparatorProperty().bind(bookTableView.comparatorProperty()); // Bind sorter to table
+        sortedData.comparatorProperty().bind(bookTableView.comparatorProperty());
 
         bookTableView.setItems(sortedData);
 
@@ -186,13 +211,22 @@ public class BookListController {
         } else {
             messageLabel.setText("");
         }
-        applyFilters(); // Apply initial filters (e.g. if search field has text from previous state)
+        applyFilters();
     }
 
-    private void setupManagerControls() {
-        boolean isManager = "manager".equalsIgnoreCase(Main.getCurrentUserRole());
+    private void setupRoleBasedControls() {
+        String currentUserRole = Main.getCurrentUserRole();
+        boolean isManager = "manager".equalsIgnoreCase(currentUserRole);
+
         managerControlsBox.setVisible(isManager);
-        managerControlsBox.setManaged(isManager); // So it doesn't take space when not visible
+        managerControlsBox.setManaged(isManager);
+
+        // "My Borrows" button should be visible to all logged-in users
+        // If userControlsBox is always meant to be visible for logged-in users
+        // no specific role check is needed here beyond being logged in.
+        // If Main.getCurrentUserRole() can be null, add a check.
+        userControlsBox.setVisible(currentUserRole != null);
+        userControlsBox.setManaged(currentUserRole != null);
     }
 
     @FXML
@@ -203,16 +237,60 @@ public class BookListController {
     }
 
     private void handleBorrowAction(Book book) {
-        // TODO: Implement actual borrowing logic (update DB, etc.)
-        System.out.println("Borrowing book: " + book.getTitle());
-        messageLabel.setText("Borrowing " + book.getTitle() + " (Not yet fully implemented).");
-        // This is a placeholder. In a real app, you'd update the DB
-        // and then refresh the masterBookList or the specific item.
-        // For example, if borrowing makes it unavailable:
-        // book.setAvailable(false); // This updates the Book object in the list
-        // bookTableView.refresh(); // Refresh table view to reflect changes
-        // To persist, you'd call bookService.updateBook(book) or similar
-        // and then potentially reloadBooks() or update the masterBookList more selectively.
+        User currentUser = Main.getCurrentUser();
+        if (currentUser == null) {
+            messageLabel.setText("Error: No user logged in.");
+            return;
+        }
+
+        if (!book.isAvailable()) {
+            messageLabel.setText("Book '" + book.getTitle() + "' is not available.");
+            return;
+        }
+
+        Alert confirmDialog = new Alert(Alert.AlertType.CONFIRMATION, "Borrow '" + book.getTitle() + "'?", ButtonType.YES, ButtonType.NO);
+        confirmDialog.setHeaderText("Confirm Borrow");
+        Optional<ButtonType> result = confirmDialog.showAndWait();
+
+        if (result.isPresent() && result.get() == ButtonType.YES) {
+            boolean success = loanService.borrowBook(book.getId(), currentUser.getId());
+            if (success) {
+                messageLabel.setText("Book '" + book.getTitle() + "' borrowed successfully.");
+                book.setAvailable(false); // Update local model
+                bookTableView.refresh(); // Refresh table to update button text and availability
+                // loadBooks(); // Or reload all books if more complex state changes
+            } else {
+                messageLabel.setText("Failed to borrow book '" + book.getTitle() + "'.");
+            }
+        }
+    }
+
+    private void handleReturnAction(Book book) {
+        // This action is currently only available to managers via the action column
+        if (!"manager".equalsIgnoreCase(Main.getCurrentUserRole())) {
+            messageLabel.setText("Only managers can perform this return action.");
+            return;
+        }
+        if (book.isAvailable()) {
+            messageLabel.setText("Book '" + book.getTitle() + "' is already available.");
+            return;
+        }
+
+        Alert confirmDialog = new Alert(Alert.AlertType.CONFIRMATION, "Return '" + book.getTitle() + "' to the library?", ButtonType.YES, ButtonType.NO);
+        confirmDialog.setHeaderText("Confirm Return");
+        Optional<ButtonType> result = confirmDialog.showAndWait();
+
+        if (result.isPresent() && result.get() == ButtonType.YES) {
+            boolean success = loanService.returnBook(book.getId());
+            if (success) {
+                messageLabel.setText("Book '" + book.getTitle() + "' returned successfully.");
+                book.setAvailable(true); // Update local model
+                bookTableView.refresh(); // Refresh table
+                // loadBooks();
+            } else {
+                messageLabel.setText("Failed to return book '" + book.getTitle() + "'. No active loan or error occurred.");
+            }
+        }
     }
 
     @FXML
@@ -290,7 +368,7 @@ public class BookListController {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Confirm Deletion");
         alert.setHeaderText("Delete Book: " + selectedBook.getTitle());
-        alert.setContentText("Are you sure you want to delete this book? This action cannot be undone.");
+        alert.setContentText("Are you sure you want to delete this book? This action cannot be undone. Books with active loans cannot be deleted.");
 
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
@@ -298,8 +376,29 @@ public class BookListController {
                 loadBooks(); // Refresh list
                 messageLabel.setText("Book deleted successfully.");
             } else {
-                messageLabel.setText("Failed to delete book. It might be part of an active loan.");
+                // BookService.deleteBook now prints a specific message if loan exists
+                messageLabel.setText("Failed to delete book. It might have an active loan or another error occurred.");
             }
+        }
+    }
+
+    @FXML
+    protected void handleManageBorrowersAction() {
+        try {
+            Main.showMemberManagementView();
+        } catch (IOException e) {
+            messageLabel.setText("Error opening borrower management.");
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    protected void handleMyBorrowsAction() {
+        try {
+            Main.showMyLoansView();
+        } catch (IOException e) {
+            messageLabel.setText("Error opening My Borrows: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

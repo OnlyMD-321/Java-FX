@@ -15,6 +15,6 @@ module org.example.efm {
 
     opens org.example.efm to javafx.fxml;
     opens org.example.efm.controller to javafx.fxml;
-    opens org.example.efm.model to javafx.base, javafx.fxml; // Ensure javafx.fxml if models are directly used in FXML, and javafx.base for PropertyValueFactory
+    opens org.example.efm.model to javafx.base, javafx.fxml;
     exports org.example.efm;
 }

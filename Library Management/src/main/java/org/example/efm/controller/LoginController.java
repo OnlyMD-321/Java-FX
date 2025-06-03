@@ -4,6 +4,7 @@ import java.io.IOException; // Ensure Main is imported
 
 import org.example.efm.Main;
 import org.example.efm.service.UserService;
+import org.example.efm.model.User; // Import User model
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -32,24 +33,36 @@ public class LoginController {
         String username = usernameField.getText();
         String password = passwordField.getText();
 
-        if (isInputInvalid(username, password, loginMessageLabel, "Username and password cannot be empty.")) {
-            return;
-        }
-
-        String[] userInfo = userService.loginUserAndGetRole(username, password);
-
-        if (userInfo != null) {
-            Main.setCurrentUser(userInfo[0], userInfo[1]); // Store username and role
-            showMessage(loginMessageLabel, "Login successful! Role: " + Main.getCurrentUserRole(), Color.GREEN);
-            System.out.println("Login successful for user: " + Main.getCurrentUsername() + " with role: " + Main.getCurrentUserRole());
-            try {
-                Main.showBookListView(); // Navigate to Book List View
-            } catch (IOException e) {
-                showMessage(loginMessageLabel, "Error loading book list.", Color.RED);
-                e.printStackTrace();
+        try {
+            if (isInputInvalid(username, password, loginMessageLabel, "Username and password cannot be empty.")) {
+                return;
             }
-        } else {
-            showMessage(loginMessageLabel, "Invalid username or password.", Color.RED);
+
+            User user = userService.loginUserAndGetDetails(username, password); // Get User object
+
+            if (user != null) {
+                Main.setCurrentUser(user); // Store User object
+                showMessage(loginMessageLabel, "Login successful! Role: " + Main.getCurrentUserRole(), Color.GREEN);
+                System.out.println("Login successful for user: " + Main.getCurrentUsername() + " with role: " + Main.getCurrentUserRole());
+                try {
+                    Main.showBookListView(); // Navigate to Book List View
+                } catch (IOException ioe) {
+                    showMessage(loginMessageLabel, "Error loading book list.", Color.RED);
+                    System.err.println("Error loading book list view after login for user: " + username);
+                    ioe.printStackTrace(); // Prints stack trace to terminal
+                }
+            } else {
+                // This case is hit if:
+                // 1. Username/password is incorrect (UserService.loginUserAndGetRole returns null, no exception).
+                // 2. An SQLException occurred in UserService (UserService prints its own error log and returns null).
+                showMessage(loginMessageLabel, "Invalid username or password.", Color.RED);
+                System.out.println("Login attempt failed for username: " + username + ". (Invalid credentials or see previous logs for system errors)");
+            }
+        } catch (Exception e) {
+            // Catch any other unexpected exceptions during the login action
+            showMessage(loginMessageLabel, "An unexpected error occurred during login. Please check logs.", Color.RED);
+            System.err.println("Unexpected error during login attempt for username: " + username);
+            e.printStackTrace(); // Prints stack trace to terminal
         }
     }
 
